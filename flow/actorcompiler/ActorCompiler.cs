@@ -74,7 +74,7 @@ namespace actorcompiler
 
         public Context Clone() { return new Context { target = target, next = next, breakF = breakF, continueF = continueF, catchFErr = catchFErr, tryLoopDepth = tryLoopDepth }; }
     };
-    
+
     class Function
     {
         public string name;
@@ -144,9 +144,9 @@ namespace actorcompiler
          *      (B) If loopDepth>0, run the actor beginning at point P until
          *          (1) it waits, in which case set an appropriate callback and return 0, or
          *          (2) it returns, in which case destroy the actor and return 0, or
-         *          (3) it reaches the bottom of the Nth innermost loop containing P, in which case 
+         *          (3) it reaches the bottom of the Nth innermost loop containing P, in which case
          *                  return max(0, the given loopDepth - N)    (N=0 for the innermost loop, N=1 for the next innermost, etc)
-         * 
+         *
          * Examples:
          *      Source:
          *          loop
@@ -159,7 +159,7 @@ namespace actorcompiler
          *                  [Q']
          *                  break
          *              [Q]
-         * 
+         *
          *      fP(1) should execute everything from [P] to [Q] and then return 1 (since [Q] is at the bottom of the 0th innermost loop containing [P])
          *          fP'(2) should execute everything from [P'] to [Q] and then return 1 (since [Q] is at the bottom of the 1st innermost loop containing [P'])
          *              fP''(3) should execute everything from [P''] to [Q] and then return 1 (since [Q] is at the bottom of the 2nd innermost loop containing [P''])
@@ -325,7 +325,7 @@ namespace actorcompiler
             var fullStateClassName = stateClassName + GetTemplateActuals(new VarDeclaration { type = "class", name = fullClassName });
 
             var body = getFunction("", "body", loopDepth0);
-            var bodyContext = new Context { 
+            var bodyContext = new Context {
                 target = body,
                 catchFErr = getFunction(body.name, "Catch", "Error error", loopDepth0),
             };
@@ -403,7 +403,7 @@ namespace actorcompiler
             writer.WriteLine("{0} {3}{1}( {2} ) {{", fullReturnType, actor.name, string.Join(", ", ParameterList()), actor.nameSpace==null ? "" : actor.nameSpace + "::");
             LineNumber(writer, actor.SourceLine);
 
-            string newActor = string.Format("new {0}({1})", 
+            string newActor = string.Format("new {0}({1})",
                     fullClassName,
                     string.Join(", ", actor.parameters.Select(p => p.name).ToArray()));
 
@@ -468,7 +468,7 @@ namespace actorcompiler
         }
         Context TryCatchCompile(CodeBlock block, Context cx)
         {
-            TryCatch(cx, cx.catchFErr, cx.tryLoopDepth, () => { 
+            TryCatch(cx, cx.catchFErr, cx.tryLoopDepth, () => {
                 cx = Compile(block, cx, true);
                 if (cx.target != null)
                 {
@@ -533,7 +533,7 @@ namespace actorcompiler
             if (actor.body.statements.Select(x => x as StateDeclarationStatement).TakeWhile(x => x != null).Any(x => x == stmt))
             {
                 // Initialize the state in the constructor, not here
-                state.Add(new StateVar { SourceLine = stmt.FirstSourceLine, name = stmt.decl.name, type = stmt.decl.type, 
+                state.Add(new StateVar { SourceLine = stmt.FirstSourceLine, name = stmt.decl.name, type = stmt.decl.type,
                     initializer = stmt.decl.initializer, initializerConstructorSyntax = stmt.decl.initializerConstructorSyntax } );
             }
             else
@@ -568,12 +568,12 @@ namespace actorcompiler
             {
                 // First compile the initExpression
                 CompileStatement( new PlainOldCodeStatement {code = stmt.initExpression + ";", FirstSourceLine = stmt.FirstSourceLine}, cx );
-                
+
                 // fullBody = { if (!(condExpression)) break; body; }
-                Statement fullBody = noCondition ? stmt.body : 
+                Statement fullBody = noCondition ? stmt.body :
                         new CodeBlock
                         {
-                            statements = new Statement[] { 
+                            statements = new Statement[] {
                                 new IfStatement
                                 {
                                     expression = "!(" + stmt.condExpression + ")",
@@ -609,7 +609,7 @@ namespace actorcompiler
                 }
 
                 if (breakF.wasCalled)
-                    TryCatch(cx.WithTarget(breakF), cx.catchFErr, cx.tryLoopDepth, 
+                    TryCatch(cx.WithTarget(breakF), cx.catchFErr, cx.tryLoopDepth,
                         () => { breakF.WriteLine("return {0};", cx.next.call("loopDepth")); });
                 else
                     cx.unreachable();
@@ -695,7 +695,7 @@ namespace actorcompiler
             LineNumber(cx.target, sourceLine);
             cx.target.WriteLine(head + " {");
             cx.target.Indent(+1);
-            var literalBreak = new LiteralBreak();           
+            var literalBreak = new LiteralBreak();
             Compile(AsCodeBlock(body), cx.LoopContext(cx.target, literalBreak, new LiteralContinue(), 0), true);
             cx.target.Indent(-1);
             cx.target.WriteLine("}");
@@ -712,12 +712,12 @@ namespace actorcompiler
                 throw new Error(stmt.FirstSourceLine, "'choose' must be followed by a compound statement.");
             var choices = codeblock.statements
                 .OfType<WhenStatement>()
-                .Select( (ch,i) => new { 
-                    Stmt = ch, 
-                    Group = group, 
+                .Select( (ch,i) => new {
+                    Stmt = ch,
+                    Group = group,
                     Index = this.whenCount+i,
-                    Body = getFunction(cx.target.name, "when", 
-                        string.Format("{0} const& {2}{1}", ch.wait.result.type, ch.wait.result.name, ch.wait.resultIsState?"__":""), 
+                    Body = getFunction(cx.target.name, "when",
+                        string.Format("{0} const& {2}{1}", ch.wait.result.type, ch.wait.result.name, ch.wait.resultIsState?"__":""),
                         loopDepth),
                     Future = string.Format("__when_expr_{0}", this.whenCount + i),
                     CallbackType = string.Format("{3}< {0}, {1}, {2} >", fullClassName, this.whenCount + i, ch.wait.result.type, ch.wait.isWaitNext ? "ActorSingleCallback" : "ActorCallback"),
@@ -741,7 +741,7 @@ namespace actorcompiler
                 callbacks.Add(new CallbackVar
                 {
                     SourceLine = ch.Stmt.FirstSourceLine,
-                    CallbackGroup = ch.Group, 
+                    CallbackGroup = ch.Group,
                     type = ch.CallbackType
                 });
                 var r = ch.Body;
@@ -750,11 +750,11 @@ namespace actorcompiler
                     CompileStatement(new StateDeclarationStatement
                     {
                         FirstSourceLine = ch.Stmt.FirstSourceLine,
-                        decl = new VarDeclaration { 
-                            type = ch.Stmt.wait.result.type, 
-                            name = ch.Stmt.wait.result.name, 
+                        decl = new VarDeclaration {
+                            type = ch.Stmt.wait.result.type,
+                            name = ch.Stmt.wait.result.name,
                             initializer = "__" + ch.Stmt.wait.result.name,
-                            initializerConstructorSyntax = false 
+                            initializerConstructorSyntax = false
                         }
                     }, cx.WithTarget(r));
                 }
@@ -771,10 +771,10 @@ namespace actorcompiler
                         r.WriteLine("loopDepth = {0};", cx.next.call(ch.Stmt.wait.result.name, "loopDepth"));
                 }
 
-                var cbFunc = new Function { 
+                var cbFunc = new Function {
                     name = "callback_fire",
                     returnType = "void",
-                    formalParameters = new string[] { 
+                    formalParameters = new string[] {
                         ch.CallbackTypeInStateClass + "*",
                         ch.Stmt.wait.result.type + " value"
                     },
@@ -791,7 +791,7 @@ namespace actorcompiler
                 {
                     name = "callback_error",
                     returnType = "void",
-                    formalParameters = new string[] { 
+                    formalParameters = new string[] {
                         ch.CallbackTypeInStateClass + "*",
                         "Error err"
                     },
@@ -822,6 +822,10 @@ namespace actorcompiler
                     LineNumber(cx.target, stmt.FirstSourceLine);
                     if (!actor.isUncancellable)
                         cx.target.WriteLine("if ({1}->actor_wait_state < 0) return {0};", cx.catchFErr.call("actor_cancelled()", AdjustLoopDepth(cx.tryLoopDepth)), This);
+                    if (choices.Length > 1 && ch.Stmt.body != null && ch.Stmt.body.containsWait()) {
+                        Console.Error.WriteLine("\t:Line {0} warning: wait() found in the first when() block.", stmt.FirstSourceLine);
+                        cx.target.WriteLine("#pragma GCC warning \"wait() here is dangerous. It may introduce priority inversion.\"");
+                    }
                 }
 
                 cx.target.WriteLine("if ({0}.isReady()) {{ if ({0}.isError()) return {2}; else return {1}; }};", ch.Future, ch.Body.call(ch.Future + "." + getFunc + "()", "loopDepth"), cx.catchFErr.call(ch.Future + ".getError()", AdjustLoopDepth(cx.tryLoopDepth)));
@@ -877,7 +881,7 @@ namespace actorcompiler
             };
             if (!stmt.resultIsState)
                 cx.next.formalParameters = new string[] {
-                    string.Format("{0} const& {1}", stmt.result.type, stmt.result.name), 
+                    string.Format("{0} const& {1}", stmt.result.type, stmt.result.name),
                     loopDepth };
             CompileStatement(equiv, cx);
         }
@@ -954,7 +958,7 @@ namespace actorcompiler
             }
             if (ifTarget == null && stmt.elseBody != null && elseTarget == null)
                 cx.unreachable();
-            else if (!cx.next.wasCalled && useContinuation) 
+            else if (!cx.next.wasCalled && useContinuation)
                 throw new Exception("Internal error: IfStatement: next not called?");
         }
         void CompileStatement(TryStatement stmt, Context cx)
@@ -994,7 +998,7 @@ namespace actorcompiler
         void CompileStatement(ThrowStatement stmt, Context cx)
         {
             LineNumber(cx.target, stmt.FirstSourceLine);
-            
+
             if (stmt.expression == "")
             {
                 if (cx.target.exceptionParameterIs != null)
@@ -1009,8 +1013,8 @@ namespace actorcompiler
         void CompileStatement(Statement stmt, Context cx)
         {
             // Use reflection for double dispatch.  SOMEDAY: Use a Dictionary<string,Action<Statement,Context>> and expression trees to memoize
-            var method = typeof(ActorCompiler).GetMethod("CompileStatement", 
-                System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.ExactBinding, 
+            var method = typeof(ActorCompiler).GetMethod("CompileStatement",
+                System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.ExactBinding,
                 null, new Type[] { stmt.GetType(), typeof(Context) }, null);
             if (method == null)
                 throw new Error(stmt.FirstSourceLine, "Statement type {0} not supported yet.", stmt.GetType().Name);
@@ -1021,7 +1025,7 @@ namespace actorcompiler
             catch (System.Reflection.TargetInvocationException e)
             {
                 if (!(e.InnerException is Error))
-                    Console.Error.WriteLine("\tHit error <{0}> for statement type {1} at line {2}\n\tStack Trace:\n{3}", 
+                    Console.Error.WriteLine("\tHit error <{0}> for statement type {1} at line {2}\n\tStack Trace:\n{3}",
                         e.InnerException.Message, stmt.GetType().Name, stmt.FirstSourceLine, e.InnerException.StackTrace);
                 throw e.InnerException;
             }
@@ -1072,8 +1076,8 @@ namespace actorcompiler
 
         private static void WriteFunction(TextWriter writer, Function func, string body)
         {
-            writer.WriteLine(memberIndentStr + "{0}{1}({2})", 
-                func.returnType == "" ? "" : func.returnType + " ", 
+            writer.WriteLine(memberIndentStr + "{0}{1}({2})",
+                func.returnType == "" ? "" : func.returnType + " ",
                 func.useByName(),
                 string.Join(",", func.formalParameters));
             if (func.returnType != "")
@@ -1095,7 +1099,7 @@ namespace actorcompiler
             int i = 0;
             while (functions.ContainsKey(string.Format("{0}{1}", proposedName, ++i))) ;
 
-            var f = new Function { 
+            var f = new Function {
                 name = string.Format("{0}{1}", proposedName, i),
                 returnType = "int",
                 formalParameters = formalParameters
@@ -1224,7 +1228,7 @@ namespace actorcompiler
         void FindState()
         {
             state = actor.parameters
-                .Select( 
+                .Select(
                     p=>new StateVar { SourceLine = actor.SourceLine, name=p.name, type=p.type, initializer=p.name, initializerConstructorSyntax=false } )
                 .ToList();
         }
