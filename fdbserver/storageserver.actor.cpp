@@ -879,7 +879,17 @@ ACTOR Future<Void> getValueQ( StorageServer* data, GetValueRequest req ) {
 		metrics.bytesReadPerKSecond =
 		    v.present() ? std::max((int64_t)(req.key.size() + v.get().size()), SERVER_KNOBS->EMPTY_READ_PENALTY)
 		                : SERVER_KNOBS->EMPTY_READ_PENALTY;
-		data->metrics.notify(req.key, metrics);
+		// data->metrics.notify(req.key, metrics);
+
+		// double expire = now() + SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL;
+
+		// notifyMetrics.bytesReadPerKSecond = data->metrics.bytesReadSample.addAndExpire(req.key,
+		// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
+		auto& vv = data->metrics.waitMetricsMap[req.key];
+		for (int i = 0; i < vv.size(); i++) {
+			TEST(true); // ShardNotifyMetrics
+			vv[i].send(metrics);
+		}
 
 		if( req.debugID.present() )
 			g_traceBatch.addEvent("GetValueDebug", req.debugID.get().first(), "getValueQ.AfterRead"); //.detail("TaskID", g_network->getCurrentTask());
@@ -1263,7 +1273,17 @@ ACTOR Future<GetKeyValuesReply> readRange( StorageServer* data, Version version,
 	result.version = version;
 	StorageMetrics metrics;
 	metrics.bytesReadPerKSecond = std::max(readSize, SERVER_KNOBS->EMPTY_READ_PENALTY);
-	data->metrics.notify(limit >= 0 ? range.begin : range.end, metrics);
+	// data->metrics.notify(limit >= 0 ? range.begin : range.end, metrics);
+	// double expire = now() + SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL;
+
+	// notifyMetrics.bytesReadPerKSecond = data->metrics.bytesReadSample.addAndExpire(req.key,
+	// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
+	auto& v = data->metrics.waitMetricsMap[limit >= 0 ? range.begin : range.end];
+	for (int i = 0; i < v.size(); i++) {
+		TEST(true); // ShardNotifyMetrics
+		v[i].send(metrics);
+	}
+
 	return result;
 }
 
@@ -1319,13 +1339,31 @@ ACTOR Future<Key> findKey( StorageServer* data, KeySelectorRef sel, Version vers
 
 		StorageMetrics metrics;
 		metrics.bytesReadPerKSecond = std::max((int64_t)rep.data[index].key.size(), SERVER_KNOBS->EMPTY_READ_PENALTY);
-		data->metrics.notify(sel.getKey(), metrics);
+		// data->metrics.notify(sel.getKey(), metrics);
+		// double expire = now() + SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL;
+
+		// notifyMetrics.bytesReadPerKSecond = data->metrics.bytesReadSample.addAndExpire(req.key,
+		// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
+		auto& v = data->metrics.waitMetricsMap[sel.getKey()];
+		for (int i = 0; i < v.size(); i++) {
+			TEST(true); // ShardNotifyMetrics
+			v[i].send(metrics);
+		}
 
 		return rep.data[ index ].key;
 	} else {
 		StorageMetrics metrics;
 		metrics.bytesReadPerKSecond = SERVER_KNOBS->EMPTY_READ_PENALTY;
-		data->metrics.notify(sel.getKey(), metrics);
+		// data->metrics.notify(sel.getKey(), metrics);
+		// double expire = now() + SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL;
+
+		// notifyMetrics.bytesReadPerKSecond = data->metrics.bytesReadSample.addAndExpire(req.key,
+		// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
+		auto& v = data->metrics.waitMetricsMap[sel.getKey()];
+		for (int i = 0; i < v.size(); i++) {
+			TEST(true); // ShardNotifyMetrics
+			v[i].send(metrics);
+		}
 
 		// FIXME: If range.begin=="" && !forward, return success?
 		*pOffset = index - rep.data.size() + 1;
