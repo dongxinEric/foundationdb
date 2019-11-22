@@ -887,7 +887,6 @@ ACTOR Future<Void> getValueQ( StorageServer* data, GetValueRequest req ) {
 		// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
 		auto& vv = data->metrics.waitMetricsMap[req.key];
 		for (int i = 0; i < vv.size(); i++) {
-			TEST(true); // ShardNotifyMetrics
 			vv[i].send(metrics);
 		}
 
@@ -1280,7 +1279,6 @@ ACTOR Future<GetKeyValuesReply> readRange( StorageServer* data, Version version,
 	// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
 	auto& v = data->metrics.waitMetricsMap[limit >= 0 ? range.begin : range.end];
 	for (int i = 0; i < v.size(); i++) {
-		TEST(true); // ShardNotifyMetrics
 		v[i].send(metrics);
 	}
 
@@ -1346,7 +1344,6 @@ ACTOR Future<Key> findKey( StorageServer* data, KeySelectorRef sel, Version vers
 		// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
 		auto& v = data->metrics.waitMetricsMap[sel.getKey()];
 		for (int i = 0; i < v.size(); i++) {
-			TEST(true); // ShardNotifyMetrics
 			v[i].send(metrics);
 		}
 
@@ -1361,7 +1358,6 @@ ACTOR Future<Key> findKey( StorageServer* data, KeySelectorRef sel, Version vers
 		// metrics.bytesReadPerKSecond, expire) * SERVER_KNOBS->STORAGE_METRICS_AVERAGE_INTERVAL_PER_KSECONDS;
 		auto& v = data->metrics.waitMetricsMap[sel.getKey()];
 		for (int i = 0; i < v.size(); i++) {
-			TEST(true); // ShardNotifyMetrics
 			v[i].send(metrics);
 		}
 
