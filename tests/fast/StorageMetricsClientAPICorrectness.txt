@@ -1,0 +1,4 @@
+testTitle=StorageMetricsClientAPI
+    testName=StorageMetricsClientAPI
+    transactionsPerSecond=250.0
+    testDuration=10.0

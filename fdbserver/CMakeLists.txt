@@ -177,6 +177,7 @@ set(FDBSERVER_SRCS
   workloads/SlowTaskWorkload.actor.cpp
   workloads/SnapTest.actor.cpp
   workloads/StatusWorkload.actor.cpp
+  workloads/StorageMetricsClientAPI.actor.cpp
   workloads/Storefront.actor.cpp
   workloads/StreamingRead.actor.cpp
   workloads/TargetedKill.actor.cpp

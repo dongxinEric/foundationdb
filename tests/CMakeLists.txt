@@ -93,6 +93,7 @@ if(WITH_PYTHON)
   add_fdb_test(TEST_FILES pingServers.TXT IGNORE)
   add_fdb_test(TEST_FILES pt.TXT IGNORE)
   add_fdb_test(TEST_FILES randomSelector.txt IGNORE)
+  add_fdb_test(TEST_FILES fast/StorageMetricsClientAPICorrectness.txt IGNORE)
   add_fdb_test(TEST_FILES selectorCorrectness.txt IGNORE)
   add_fdb_test(TEST_FILES fast/AtomicBackupCorrectness.txt)
   add_fdb_test(TEST_FILES fast/AtomicBackupToDBCorrectness.txt)
@@ -148,6 +149,7 @@ if(WITH_PYTHON)
   add_fdb_test(TEST_FILES rare/RandomReadWriteTest.txt)
   add_fdb_test(TEST_FILES rare/SwizzledLargeApiCorrectness.txt)
   add_fdb_test(TEST_FILES rare/RedwoodCorrectnessBTree.txt)
+
 
   add_fdb_test(
     TEST_FILES restarting/from_7.0.0/ConfigureTestRestart-1.txt
